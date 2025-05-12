@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cargar Turno</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 30px;
+      color: #333;
+    }
+    .contenedor {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2a5d9f;
+      margin-bottom: 25px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background-color: #2a5d9f;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #1e3f73;
+    }
+    .mensaje {
+      margin-top: 20px;
+      text-align: center;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h2>Cargar Turno</h2>
+    <form id="turnoForm">
+      <label for="dni">DNI:</label>
+      <input type="text" id="dni" required>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" required>
+      <label for="apellido">Apellido:</label>
+      <input type="text" id="apellido" required>
+      <label for="edad">Edad:</label>
+      <input type="number" id="edad" required>
+      <label for="telefono">Teléfono o Celular:</label>
+      <input type="text" id="telefono" required>
+      <label for="profesional">Profesional:</label>
+      <select id="profesional" required>
+        <option value="Psicología">Psicología</option>
+        <option value="Trabajo Social">Trabajo Social</option>
+        <option value="Psiquiatría">Psiquiatría</option>
+        <option value="Consejería">Consejería</option>
+      </select>
+      <label for="fecha">Fecha del Turno:</label>
+      <input type="date" id="fecha" required>
+      <label for="hora">Hora del Turno:</label>
+      <input type="time" id="hora" required>
+      <button type="submit">Guardar Turno</button>
+    </form>
+    <div class="mensaje" id="mensajeExito"></div>
+  </div>
+  <script>
+    document.getElementById('turnoForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const turno = {
+        dni: document.getElementById('dni').value,
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        edad: document.getElementById('edad').value,
+        telefono: document.getElementById('telefono').value,
+        profesional: document.getElementById('profesional').value,
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value
+      };
+      let turnos = JSON.parse(localStorage.getItem('turnos')) || [];
+      turnos.push(turno);
+      localStorage.setItem('turnos', JSON.stringify(turnos));
+      document.getElementById('mensajeExito').textContent = "✅ Turno guardado correctamente.";
+      this.reset();
+      setTimeout(() => {
+        document.getElementById('mensajeExito').textContent = "";
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ver Turnos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 30px;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      color: #2a5d9f;
+    }
+    .contenedor {
+      max-width: 700px;
+      margin: auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    label, select, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px;
+      background: #2a5d9f;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1e3f73;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #eaf0f7;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .eliminar {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .eliminar:hover {
+      background: #c0392b;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .navegar {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .navegar a {
+      color: #2a5d9f;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h2>Ver Turnos por Profesional</h2>
+    <label for="profesionalFiltro">Seleccionar profesional:</label>
+    <select id="profesionalFiltro">
+      <option value="Psicología">Psicología</option>
+      <option value="Trabajo Social">Trabajo Social</option>
+      <option value="Psiquiatría">Psiquiatría</option>
+      <option value="Consejería">Consejería</option>
+    </select>
+    <div class="btn-group">
+      <button onclick="mostrarTurnos()">Mostrar Turnos</button>
+      <button onclick="descargarPDF()">Descargar PDF</button>
+    </div>
+    <ul id="listaTurnos"></ul>
+    <div class="navegar">
+      <a href="cargar_turno.html">← Cargar nuevo turno</a>
+    </div>
+  </div>
+  <script>
+    function mostrarTurnos() {
+      const profesional = document.getElementById('profesionalFiltro').value;
+      const turnos = JSON.parse(localStorage.getItem('turnos')) || [];
+      const lista = document.getElementById('listaTurnos');
+      lista.innerHTML = '';
+      const filtrados = turnos.filter(t => t.profesional === profesional);
+      if (filtrados.length === 0) {
+        lista.innerHTML = '<li>No hay turnos</li>';
+      } else {
+        filtrados.forEach(t => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <strong>Fecha:</strong> ${t.fecha} <br>
+            <strong>Hora:</strong> ${t.hora} <br>
+            <strong>DNI:</strong> ${t.dni} <br>
+            <strong>Nombre:</strong> ${t.nombre} <br>
+            <strong>Apellido:</strong> ${t.apellido} <br>
+            <strong>Edad:</strong> ${t.edad} <br>
+            <strong>Teléfono:</strong> ${t.telefono}
+          `;
+          const btn = document.createElement('button');
+          btn.textContent = 'Eliminar';
+          btn.className = 'eliminar';
+          btn.onclick = () => eliminarTurno(t);
+          li.appendChild(btn);
+          lista.appendChild(li);
+        });
+      }
+    }
+    function eliminarTurno(turnoAEliminar) {
+      let turnos = JSON.parse(localStorage.getItem('turnos')) || [];
+      turnos = turnos.filter(t =>
+        !(t.dni === turnoAEliminar.dni && t.fecha === turnoAEliminar.fecha &&
+          t.hora === turnoAEliminar.hora && t.profesional === turnoAEliminar.profesional));
+      localStorage.setItem('turnos', JSON.stringify(turnos));
+      mostrarTurnos();
+    }
+    async function descargarPDF() {
+      const profesional = document.getElementById('profesionalFiltro').value;
+      const turnos = JSON.parse(localStorage.getItem('turnos')) || [];
+      const filtrados = turnos.filter(t => t.profesional === profesional);
+      if (filtrados.length === 0) {
+        alert("No hay turnos para exportar.");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text(`Turnos - ${profesional}`, 10, 10);
+      doc.setFontSize(11);
+      let y = 20;
+      filtrados.forEach((t, i) => {
+        const texto = `Fecha: ${t.fecha}, Hora: ${t.hora}, DNI: ${t.dni}, Nombre: ${t.nombre} ${t.apellido}, Edad: ${t.edad}, Tel: ${t.telefono}`;
+        doc.text(texto, 10, y);
+        y += 10;
+        if (y > 270) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+      doc.save(`turnos_${profesional}.pdf`);
+    }
+  </script>
+</body>
+</html>
